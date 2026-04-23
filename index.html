@@ -1,90 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Task Gateway</title>
-    <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; line-height: 1.6; }
-        #preview { max-width: 100%; margin-top: 10px; display: none; border-radius: 8px; }
-        .status { padding: 10px; margin-top: 20px; border-radius: 4px; display: none; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-    </style>
-</head>
-<body>
-
-    <h2>Upload Image for Processing</h2>
-    <p>Select an image to send to the RabbitMQ worker queue.</p>
-
-    <input type="file" id="imageInput" accept="image/*">
-    <br>
-    <img id="preview" alt="Image preview">
-    <br>
-    <button id="uploadBtn">Send to Worker</button>
-
-    <div id="statusBox" class="status"></div>
-
-    <script>
-        const imageInput = document.getElementById('imageInput');
-        const preview = document.getElementById('preview');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const statusBox = document.getElementById('statusBox');
-
-        // Show a preview of the image when selected
-        imageInput.addEventListener('change', () => {
-            const file = imageInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        uploadBtn.addEventListener('click', async () => {
-            const file = imageInput.files[0];
-            if (!file) {
-                alert("Please select an image first!");
-                return;
-            }
-
-            // Convert image to Base64 string
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                const base64Image = reader.result;
-
-                showStatus("Sending to API...", "success");
-
-                try {
-                    const response = await fetch('http://localhost:8000/process', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            filename: file.name,
-                            image_data: base64Image,
-                            timestamp: new Date().toISOString()
-                        })
-                    });
-
-                    const result = await response.json();
-                    showStatus("Task queued successfully! Worker is processing...", "success");
-                    console.log("Server Response:", result);
-                } catch (err) {
-                    showStatus("Error connecting to API. Is FastAPI running?", "error");
-                    console.error(err);
-                }
-            };
-        });
-
-        function showStatus(msg, type) {
-            statusBox.innerText = msg;
-            statusBox.className = `status ${type}`;
-            statusBox.style.display = 'block';
-        }
-    </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
